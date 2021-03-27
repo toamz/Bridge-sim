@@ -12,15 +12,9 @@
 
 #include "levels.h"
 #include "Timer.h"
-#include <mutex>
 
 std::pair<MouseEvent, bool> mouseClickPos = { MouseEvent(), false };
 static sf::Vector2i mousePos;
-
-
-INT WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, INT) {
-
-}
 
 int main()
 {
@@ -79,7 +73,7 @@ int main()
 int WorldRenderLoop(sf::RenderWindow* window, bool* shouldClose) {
     World world(window);
     world.Update();
-    world.Load(bridgeHugeWorld);
+    world.Load(testWorld);
 
     sf::View view;
     view.setCenter({ 0, 0 });
@@ -124,7 +118,6 @@ int EditorRenderLoop(sf::RenderWindow* window, bool* shouldClose) {
 
     while (!*shouldClose)
     {
-        //Timer t;
         window->setView(view);
         if (mouseClickPos.second) {
             worldEditor.Click(mouseClickPos.first);

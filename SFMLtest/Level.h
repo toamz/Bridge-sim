@@ -11,25 +11,18 @@ struct Connection;
 
 struct Point {
 	vec2f pos;
+	vec2f prevPos = pos;
 	vec2f velocity;
 	std::vector<Connection*> connections;
+	bool isStatic;
 
-	Point(vec2f pos)
-		:pos(pos) {};
-};
-struct Rigid : public Point {
+	Point(vec2f pos, bool isStatic)
+		:pos(pos), isStatic(isStatic) {};
 
 	std::vector<vec2f> prevForces;
 
 	void addForces();
 	void updatePosition();
-
-	Rigid(vec2f pos)
-		:Point(pos)	{};
-};
-struct Static : public Point {
-	Static(vec2f pos)
-		:Point(pos) {};
 };
 
 struct Connection {
@@ -86,8 +79,7 @@ struct Connection {
 
 class World {
 public:
-	std::vector<Static> statics;
-	std::vector<Rigid>  rigids;
+	std::vector<Point> points;
 	std::vector<Connection> connections;
 
 	sf::Vector2f lastPos;
@@ -124,8 +116,7 @@ public:
 	{}
 
 	void Load(const std::string& s) {
-		w.rigids.reserve(128);
-		w.statics.reserve(256);
+		w.points.reserve(256);
 		w.connections.reserve(512);
 		w.Load(s);
 	}

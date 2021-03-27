@@ -120,6 +120,7 @@
       <AdditionalIncludeDirectories>C:\Users\tomas\source\libs\SFML-2.5.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
       <LanguageStandard>stdcpplatest</LanguageStandard>
+      <FloatingPointModel>Fast</FloatingPointModel>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -161,7 +162,6 @@
     <ClInclude Include="Level.h" />
     <ClInclude Include="levels.h" />
     <ClInclude Include="main.h" />
-    <ClInclude Include="resource1.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="vec.h" />
   </ItemGroup>

@@ -7,10 +7,6 @@ static vec2f gravity = { 0, 10.0f };
 
 static int steps = 300; 
 
-// 0.01852896 bez
-// 0.01479858 s
-// 0.01473931 s
-
 static float delta = 0.01f / steps;
 
 void World::Update()
@@ -23,10 +19,13 @@ void World::Update()
 		for (auto& connection : connections) {
 			connection.UpdateForce();
 		}
-		for (auto& point : rigids) {
+		for (auto& point : points) {
+			if (point.isStatic)
+				continue;
 			point.addForces();
 			point.updatePosition();
 		}
+		//CheckCollisions();
 	}
 }
 
@@ -54,46 +53,28 @@ void World::Load(const std::string& s)
 {
 	try {
 		size_t space1 = s.find(' ', 0);
-		size_t space2 = s.find(' ', space1 + 1);
-		size_t endln = s.find('\n', space2 + 1);
+		size_t endln = s.find('\n', space1 + 1);
 
-		int  staticCount = std::stoi(s.substr(0, space1));
-		int   rigidCount = std::stoi(s.substr(space1 + 1, space2 - space1 - 1));
-		int connectCount = std::stoi(s.substr(space2 + 1, endln - space2 - 1));
+		int  pointsCount = std::stoi(s.substr(0, space1));
+		int connectCount = std::stoi(s.substr(space1 + 1, endln - (space1 + 1)));
 
-		statics.reserve(staticCount);
-		rigids.reserve(rigidCount);
+		points.reserve(pointsCount);
 		connections.reserve(connectCount);
 
 		for (size_t i = endln + 1; i < s.size(); i++) {
 			if (s[i] == '\n')
 				continue;
 
-			size_t space = s.find(' ', i + 1);
+			size_t space = s.find(' ', i + 2);
 			size_t endln = s.find('\n', space + 1);
 
-			int x = std::stoi(s.substr(i + 1, space - i - 1));
-			int y = std::stoi(s.substr(space + 2, endln - space - 2));
+			int x = std::stoi(s.substr(i + 2, space - i - 2));
+			int y = std::stoi(s.substr(space + 1, endln - space - 1));
 
-			if (s[i] == 'S') {
-				statics.emplace_back(vec2f((float)x, (float)-y));
-			}
-			else if (s[i] == 'R') {
-				rigids.emplace_back(vec2f((float)x, (float)-y));
-			}
-			else {
-				Point* a, * b;
-				if (s[i] == 's')
-					a = &statics[x];
-				else
-					a = &rigids[x];
-
-				if (s[space + 1] == 's')
-					b = &statics[y];
-				else
-					b = &rigids[y];
-
-				connections.emplace_back(a, b);
+			if (s[i] == 'c') {
+				connections.emplace_back(&points[x], &points[y]);
+			}else{
+				points.emplace_back(vec2f((float)x, (float)-y), s[i] == 's');
 			}
 			i = endln;
 		}
@@ -109,16 +90,21 @@ float normal(const vec2f& A, const vec2f& B, const vec2f& C) {
 	vec2f b = A - C;
 	return a.x * b.y - b.x * a.y;
 }
-/*
+
 void World::CheckCollisions() {
 	for (auto&& i : connections) {
-		for (auto&& j : statics) {
+		for (auto&& j : points) {
 			float curr = normal(i.points[0]->pos, i.points[1]->pos, j.pos);
-			float prev = normal(i.points[0]->, i.points[1]->pos, j.pos);
+			float prev = normal(i.points[0]->prevPos, i.points[1]->prevPos, j.prevPos);
+			if (curr * prev < 0) {
+				i.points[0]->pos = i.points[0]->prevPos;
+				i.points[1]->pos = i.points[1]->prevPos;
+				j.pos = j.prevPos;
+			}
 		}
 	}
 }
-*/
+
 void Connection::UpdateLength() {
 	currentLength = abs((points[0]->pos - points[1]->pos).length());
 	center = (points[0]->pos + points[1]->pos) / 2;
@@ -144,7 +130,7 @@ void Connection::UpdateForce() {
 	}
 }
 
-void Rigid::addForces()
+void Point::addForces()
 {
 	prevForces.resize(connections.size());
 
@@ -160,7 +146,8 @@ void Rigid::addForces()
 	this->velocity += totalForce;
 }
 
-void Rigid::updatePosition()
+void Point::updatePosition()
 {
+	prevPos = pos;
 	pos += velocity * delta;
 }
