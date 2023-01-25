@@ -13,12 +13,15 @@
 #include "levels.h"
 #include "Timer.h"
 
+const std::string &defaultWord = testWorld;
+// Can be changed to: fallingStickWorld
+
 std::pair<MouseEvent, bool> mouseClickPos = { MouseEvent(), false };
 static sf::Vector2i mousePos;
 
 int main()
 {
-    sf::RenderWindow window(sf::VideoMode(800, 800), "Hýbej s oknem!!", sf::Style::Close);
+    sf::RenderWindow window(sf::VideoMode(800, 800), "Move the window!", sf::Style::Close);
     window.setVerticalSyncEnabled(true);
 
     window.setActive(false);
@@ -73,7 +76,7 @@ int main()
 int WorldRenderLoop(sf::RenderWindow* window, bool* shouldClose) {
     World world(window);
     world.Update();
-    world.Load(testWorld);
+    world.Load(defaultWord);
 
     sf::View view;
     view.setCenter({ 0, 0 });

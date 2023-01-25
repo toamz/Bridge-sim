@@ -1,6 +1,6 @@
 #pragma once
 
-#include <string>;
+#include <string>
 
 const std::string fallingStickWorld = // static rigid connection
 R"(
